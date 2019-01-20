@@ -1,29 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="08e00021-be88-4326-b8f8-ab4d949d9a23" name="Default" comment="working version with finding Octane user by first name/last name.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.firebaserc" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/sigi.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+    <list default="true" id="08e00021-be88-4326-b8f8-ab4d949d9a23" name="Default" comment="">
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/database.rules.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/firebase.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/firestore.indexes.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/firestore.rules" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/octane.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/package-lock.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/package.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/src/fulfillment.ts" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/src/index.ts" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/src/routesConfig.ts" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/tsconfig.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functions/tslint.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/public/404.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/public/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/storage.rules" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -390,12 +369,20 @@
       <workItem from="1542116206747" duration="10662000" />
       <workItem from="1542143996237" duration="21032000" />
       <workItem from="1545737702203" duration="3175000" />
-      <workItem from="1548000479824" duration="1659000" />
+      <workItem from="1548000479824" duration="1682000" />
     </task>
+    <task id="LOCAL-00001" summary="working version with finding Octane user by first name/last name.">
+      <created>1548002152032</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1548002152032</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="97257000" />
+    <option name="totallyTimeSpent" value="97280000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
