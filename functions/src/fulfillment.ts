@@ -2,13 +2,20 @@ const {
     dialogflow,
     Permission,
     Table,
-    SignIn
+    OpenUrlAction,
+    SignIn,
+    BasicCard,
+    Button
 } = require('actions-on-google');
 const functions = require('firebase-functions');
 const app = dialogflow();
 const Octane = require('@microfocus/alm-octane-js-rest-sdk');
 const Query = require('@microfocus/alm-octane-js-rest-sdk/lib/query');
 const routesConfig = require('./routesConfig');
+const superagent = require('superagent').agent();
+const request = require('request');
+const CookieAccessInfo = require('cookiejar').CookieAccessInfo;
+
 
 const octane = new Octane({
     protocol: 'https',
@@ -20,49 +27,79 @@ const octane = new Octane({
 });
 
 const authenticateAndDo = async (conv, foo) => new Promise((resolve) => {
-    octane.authenticate({
-        username: 'moshe.stekel@microfocus.com',
-        password: 'Tashkent_100'
-    }, (err) => {
-        if (err) {
-            conv.ask(JSON.stringify(err.message));
-            resolve();
-        } else {
-            foo(resolve);
-        }
+    superagent.post('https://center.almoctane.com/authentication/grant_tool_token').send({identifier: conv.data.octaneUserId}).set('accept', 'json').end((err, res) => {
+        const responseBody = JSON.parse(res.text);
+
+        const host = octane.config.host || octane.constants.host;
+        const protocol = octane.config.protocol || octane.constants.protocol || 'http';
+        const port = octane.config.port || (protocol === 'https' ? 443 : 80);
+        const pathPrefix = octane.config.pathPrefix
+            ? '/' + octane.config.pathPrefix.replace(/(^[\/]+|[\/]+$)/g, '')
+            : '';
+
+        let baseUrl = protocol + '://' + host + ':' + port + pathPrefix +
+            '/api/shared_spaces/' + octane.config.shared_space_id +
+            '/workspaces/' + octane.config.workspace_id;
+
+        //baseUrl = 'https://webhook.site/c987f5b5-8c73-4e21-a7b2-5c2e8e397a87';
+
+        const jar = request.jar();
+        const cookie = request.cookie(responseBody.cookie_name + '=' + responseBody.access_token + "; path=/; domain=.almoctane.com; Secure; HttpOnly; Expires=Tue, 19 Jan 2038 03:14:07 GMT;")
+        jar.setCookie(cookie, baseUrl);
+        const opt = {
+            jar: jar,
+            json: true,
+            baseUrl: baseUrl
+        };
+
+        octane.requestor = request.defaults(opt);
+
+        // octane.workItems.getAll({ limit: 1 }, ()=> {
+        //     conv.ask(octane.requestor.jar);
+        //     resolve();
+        //
+        // });
+
+        foo(resolve);
     });
+
+    // octane.authenticate({
+    //     username: 'moshe.stekel@microfocus.com',
+    //     password: 'Tashkent_100'
+    // }, (err) => {
+    //     if (err) {
+    //         conv.ask(JSON.stringify(err.message));
+    //         resolve();
+    //     } else {
+    //         foo(resolve);
+    //     }
+    // });
 });
 
 let permission = new Permission({
     permissions: 'NAME'
 });
 
-app.intent('actions_intent_PERMISSION', (conv, params, permissionGranted) => {
-    if (!permissionGranted) {
-        conv.ask(`Ok, no worries. You can login later.`);
-        return null;
-    } else {
-        return authenticateAndDo(conv, resolve => {
-            const query = Query.field('first_name').equal(conv.user.name.given).and().field('last_name').equal(conv.user.name.family);
-            octane.workspaceUsers.getAll({
-                query: query
-            }, (err, users) => {
-                if (err) {
-                    conv.ask(JSON.stringify(err.message));
-                    resolve();
-                } else {
-                    if (users.length === 0) {
-                        conv.ask('No user found in Octane who matches your Google name: ' + conv.user.name.given + ' ' + conv.user.name.family);
-                        resolve();
-                    } else {
-                        conv.data.userName = users[0].name;
-                        conv.ask('You are identified as ' + users[0].name + '. Now you can ask me questions related to Octane.');
-                        resolve();
-                    }
-                }
-            });
-        });
-    }
+const loginWithOctane = conv => new Promise(resolve => {
+    superagent.get('https://center.almoctane.com/authentication/grant_tool_token').end((err, res) => {
+        const responseBody = JSON.parse(res.text);
+        conv.data.octaneUserId = responseBody.identifier;
+        conv.data.userName = 'moshe.stekel@microfocus.com';
+        conv.ask('Login To Octane');
+        conv.ask(new BasicCard({
+            title: 'Login To Octane',
+            text: 'Use the button below to open Octane Log-in Screen',
+            buttons: [
+                new Button({
+                    title: 'Log In To Octane',
+                    action: new OpenUrlAction({
+                        url: responseBody.authentication_url
+                    })
+                })
+            ]
+        }));
+        resolve();
+    });
 });
 
 const getFoo = conv => {
@@ -198,9 +235,8 @@ const getFoo = conv => {
 };
 
 app.fallback(conv => {
-    if (!conv.data.userName) {
-        conv.ask(permission);
-        return null;
+    if (!conv.data.octaneUserId) {
+        return loginWithOctane(conv);
     } else {
         return authenticateAndDo(conv, getFoo(conv));
     }
