@@ -14,7 +14,7 @@ const Query = require('@microfocus/alm-octane-js-rest-sdk/lib/query');
 const routesConfig = require('./routesConfig');
 const superagent = require('superagent').agent();
 const request = require('request');
-const CookieAccessInfo = require('cookiejar').CookieAccessInfo;
+var setCookie = require('set-cookie-parser');
 
 
 const octane = new Octane({
@@ -41,10 +41,8 @@ const authenticateAndDo = async (conv, foo) => new Promise((resolve) => {
             '/api/shared_spaces/' + octane.config.shared_space_id +
             '/workspaces/' + octane.config.workspace_id;
 
-        //baseUrl = 'https://webhook.site/c987f5b5-8c73-4e21-a7b2-5c2e8e397a87';
-
         const jar = request.jar();
-        const cookie = request.cookie(responseBody.cookie_name + '=' + responseBody.access_token + "; path=/; domain=.almoctane.com; Secure; HttpOnly; Expires=Tue, 19 Jan 2038 03:14:07 GMT;")
+        const cookie = request.cookie(responseBody.cookie_name + '=' + responseBody.access_token + "; path=/; domain=.almoctane.com; Secure;")
         jar.setCookie(cookie, baseUrl);
         const opt = {
             jar: jar,
@@ -53,45 +51,34 @@ const authenticateAndDo = async (conv, foo) => new Promise((resolve) => {
         };
 
         octane.requestor = request.defaults(opt);
+        octane.requestor.get('').on('response', res1 => {
+            try {
+                const cookies = setCookie.parse(res1, {
+                    decodeValues: true,
+                    map: true
+                });
+                const username = Buffer.from(cookies['OCTANE_USER'].value, 'base64').toString();
+                foo(username, resolve);
+            } catch (ex) {
+                conv.ask(ex.message);
+                resolve();
+            }
+        });
 
-        // octane.workItems.getAll({ limit: 1 }, ()=> {
-        //     conv.ask(octane.requestor.jar);
-        //     resolve();
-        //
-        // });
-
-        foo(resolve);
     });
-
-    // octane.authenticate({
-    //     username: 'moshe.stekel@microfocus.com',
-    //     password: 'Tashkent_100'
-    // }, (err) => {
-    //     if (err) {
-    //         conv.ask(JSON.stringify(err.message));
-    //         resolve();
-    //     } else {
-    //         foo(resolve);
-    //     }
-    // });
-});
-
-let permission = new Permission({
-    permissions: 'NAME'
 });
 
 const loginWithOctane = conv => new Promise(resolve => {
     superagent.get('https://center.almoctane.com/authentication/grant_tool_token').end((err, res) => {
         const responseBody = JSON.parse(res.text);
         conv.data.octaneUserId = responseBody.identifier;
-        conv.data.userName = 'moshe.stekel@microfocus.com';
-        conv.ask('Login To Octane');
+        conv.ask('Login With Octane');
         conv.ask(new BasicCard({
-            title: 'Login To Octane',
+            title: 'Login With Octane',
             text: 'Use the button below to open Octane Log-in Screen',
             buttons: [
                 new Button({
-                    title: 'Log In To Octane',
+                    title: 'Login With Octane',
                     action: new OpenUrlAction({
                         url: responseBody.authentication_url
                     })
@@ -103,15 +90,15 @@ const loginWithOctane = conv => new Promise(resolve => {
 });
 
 const getFoo = conv => {
-    const userQuery = Query.field('name').equal(conv.data.userName);
     switch (conv.intent) {
         case 'welcome_intent':
-            return resolve => {
+            return (username, resolve) => {
                 conv.ask('Hi, I\'m Octane Siggy. Talk to me!');
                 resolve();
             }
         case 'my_top_priority_items':
-            return resolve => {
+            return (username, resolve) => {
+                const userQuery = Query.field('name').equal(username);
                 const query = Query.field('owner').equal(userQuery)
                     .and().field('subtype').inComparison(['defect', 'story'])
                     .and().field('phase').equal(Query.field('logical_name')
@@ -164,8 +151,7 @@ const getFoo = conv => {
                 });
             };
         case 'did_i_break_the_build':
-            return resolve => {
-                //Query.field('merged_on_it').equal(userQuery)
+            return (username, resolve) => {
                 const query1 = Query.field('subtype').inComparison(['gherkin_automated_run', 'run_automated'])
                     .and().field('latest_pipeline_run').equal(true).and().field('merged_on_it').notEqual(Query.NONE);
                 octane.runs.getAll({
@@ -179,7 +165,7 @@ const getFoo = conv => {
                         const userIds = [];
                         for (const i in items) {
                             if (items[i].merged_on_it) {
-                                youBrokeTheBuild = youBrokeTheBuild || conv.data.userName === items[i].merged_on_it.name;
+                                youBrokeTheBuild = youBrokeTheBuild || username === items[i].merged_on_it.name;
                                 userIds.push(items[i].merged_on_it.id);
                             }
                         }
@@ -221,13 +207,13 @@ const getFoo = conv => {
                 });
             };
         case 'what_is_the_build_status':
-            return resolve => {
+            return (username, resolve) => {
                 conv.ask('Master Quick status is green');
                 conv.ask('Master Full status is red');
                 resolve();
             }
         default:
-            return resolve => {
+            return (username, resolve) => {
                 conv.ask('Octane doesn\'t support your request yet. Please ask Daniel Finkelstein for more budget.');
                 resolve();
             }

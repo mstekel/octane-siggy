@@ -19,6 +19,7 @@
     "firebase-functions": "^2.1.0",
     "innertext": "^1.0.3",
     "request": "^2.88.0",
+    "set-cookie-parser": "^2.3.5",
     "superagent": "^4.1.0"
   },
   "devDependencies": {
