@@ -9643,6 +9643,192 @@ const config = {
             "description": "Delete a single pipeline."
         }
     },
+    "pipeline runs": {
+        "get-all": {
+            "url": "/pipeline_runs",
+            "method": "GET",
+            "params": {
+                "$query": null,
+                "$limit": null,
+                "$offset": null,
+                "$fields": null,
+                "$order_by": null,
+                "$text_search": null
+            },
+            "description": "Gets pipeline runs list."
+        },
+        "get": {
+            "url": "/pipeline_runs/:id",
+            "method": "GET",
+            "params": {
+                "$id": null,
+                "$fields": null
+            },
+            "description": "Gets a single pipeline run."
+        },
+        "update": {
+            "url": "/pipeline_runs/:id",
+            "method": "PUT",
+            "params": {
+                "client_lock_stamp": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "Client lock stamp",
+                    "min_value": 0,
+                    "max_value": 9007199254740991
+                },
+                "not_me_user": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Not me user",
+                    "field_type_data": {
+                        "multiple": true,
+                        "targets": [
+                            {
+                                "type": "workspace_user"
+                            }
+                        ]
+                    }
+                },
+                "participating_ci_builds": {
+                    "type": "object",
+                    "required": false,
+                    "description": "Participating ci builds"
+                },
+                "user_tags": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Tags",
+                    "field_type_data": {
+                        "multiple": true,
+                        "targets": [
+                            {
+                                "type": "user_tag"
+                            }
+                        ]
+                    }
+                },
+                "application_package": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Application package",
+                    "field_type_data": {
+                        "multiple": false,
+                        "targets": [
+                            {
+                                "type": "application_package"
+                            }
+                        ]
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Name",
+                    "max_length": 255
+                },
+                "runs": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Runs",
+                    "field_type_data": {
+                        "multiple": true,
+                        "targets": [
+                            {
+                                "type": "run_automated"
+                            },
+                            {
+                                "type": "gherkin_automated_run"
+                            }
+                        ]
+                    }
+                },
+                "$id": null
+            },
+            "description": "Update a single pipeline run."
+        },
+        "update-bulk": {
+            "url": "/pipeline_runs",
+            "method": "PUT",
+            "params": {
+                "client_lock_stamp": {
+                    "type": "integer",
+                    "required": false,
+                    "description": "Client lock stamp",
+                    "min_value": 0,
+                    "max_value": 9007199254740991
+                },
+                "not_me_user": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Not me user",
+                    "field_type_data": {
+                        "multiple": true,
+                        "targets": [
+                            {
+                                "type": "workspace_user"
+                            }
+                        ]
+                    }
+                },
+                "participating_ci_builds": {
+                    "type": "object",
+                    "required": false,
+                    "description": "Participating ci builds"
+                },
+                "user_tags": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Tags",
+                    "field_type_data": {
+                        "multiple": true,
+                        "targets": [
+                            {
+                                "type": "user_tag"
+                            }
+                        ]
+                    }
+                },
+                "application_package": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Application package",
+                    "field_type_data": {
+                        "multiple": false,
+                        "targets": [
+                            {
+                                "type": "application_package"
+                            }
+                        ]
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Name",
+                    "max_length": 255
+                },
+                "runs": {
+                    "type": "reference",
+                    "required": false,
+                    "description": "Runs",
+                    "field_type_data": {
+                        "multiple": true,
+                        "targets": [
+                            {
+                                "type": "run_automated"
+                            },
+                            {
+                                "type": "gherkin_automated_run"
+                            }
+                        ]
+                    }
+                },
+                "$id": null
+            },
+            "description": "Update multiple pipeline run."
+        }
+    },
     "stories": {
         "get-all": {
             "url": "/stories",

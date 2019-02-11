@@ -5,7 +5,7 @@
     "port": 443,
     "shared_space_id": 1001,
     "workspace_id": 1002,
-    "tech_preview_API": false
+    "tech_preview_API": true
   },
   "options": {
     "username": "moshe.stekel@microfocus.com",

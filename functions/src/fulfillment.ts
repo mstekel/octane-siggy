@@ -23,7 +23,6 @@ const octane = new Octane({
 });
 
 const handleError = (err, conv) => {
-    conv.ask(err.stack.toString());
     console.error(err);
 };
 
@@ -101,8 +100,8 @@ const authenticateAndDo = (conv, foo) => new Promise((resolve, reject) => {
             (error, response, body) => {
                 try {
                     if (response.statusCode !== 200) {
-                        if(response.statusCode === 424) {
-                            loginWithOctane(conv).then(() => resolve()).catch(err => {
+                        if (response.statusCode === 424) {
+                            loginWithOctane(conv).then(resolve).catch(err => {
                                 handleError(err, conv);
                                 resolve();
                             });
@@ -114,8 +113,9 @@ const authenticateAndDo = (conv, foo) => new Promise((resolve, reject) => {
                         const baseUrl = getBaseUrl();
 
                         const jar = request.jar();
-                        const cookie = request.cookie(body.cookie_name + '=' + body.access_token + "; " + cookieSuffix);
-                        jar.setCookie(cookie, baseUrl);
+
+                        jar.setCookie(request.cookie(body.cookie_name + '=' + body.access_token + '; ' + cookieSuffix), baseUrl);
+                        jar.setCookie(request.cookie('HPECLIENTTYPE=HPE_MQM_UI;' + cookieSuffix), baseUrl);
 
                         const opt = {
                             jar: jar,
@@ -132,7 +132,7 @@ const authenticateAndDo = (conv, foo) => new Promise((resolve, reject) => {
                                     map: true
                                 });
                                 const username = Buffer.from(cookies['OCTANE_USER'].value, 'base64').toString();
-                                foo(username).then(() => resolve());
+                                foo(username).then(resolve);
                             } catch (ex) {
                                 handleError(ex, conv);
                                 resolve();
@@ -150,6 +150,28 @@ const authenticateAndDo = (conv, foo) => new Promise((resolve, reject) => {
     } catch (ex) {
         handleError(ex, conv);
         resolve();
+    }
+});
+
+const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject) => {
+    try {
+        const query = Query.field('pipeline').equal(Query.field('name').equal(pipeline.name)).and()
+            .field('status').notEqual(Query.field('logical_name').equal('list_node.pipeline_run_status.running'));
+        octane.pipelineRuns.getAll({
+            limit: 1,
+            query: query,
+            order_by: '-start_time'
+        }, (ex, items) => {
+            if (ex) {
+                reject(ex);
+            } else if (items && items.length > 0) {
+                resolve(pipeline.shortName + ' status is ' + items[0].status.name);
+            } else {
+                reject(new Error('No run of pipeline ' + pipeline.name + ' found'));
+            }
+        });
+    } catch (ex) {
+        reject(ex);
     }
 });
 
@@ -187,7 +209,7 @@ const getFoo = conv => {
                                             defectCount++;
                                         else if (items[i].subtype === 'story')
                                             storyCount++;
-                                        rows.push([items[i].subtype + ': ' + items[i].name]);
+                                        rows.push([items[i].subtype + ' ' + items[i].id + ': ' + items[i].name]);
                                     }
                                 }
                                 let message = 'You have ' + items.length + ' most top items';
@@ -278,9 +300,21 @@ const getFoo = conv => {
                 });
             case 'what_is_the_build_status':
                 return username => new Promise((resolve, reject) => {
-                    conv.ask('Master Quick status is green');
-                    conv.ask('Master Full status is red');
-                    resolve();
+                    Promise.all([
+                        getLastRunStatusByPipelineName({name: 'ALM Octane Quick Master', shortName: 'Quick'}),
+                        getLastRunStatusByPipelineName({name: 'ALM Octane Full Master', shortName: 'Full'}),
+                        getLastRunStatusByPipelineName({name: 'MQM Root OP Nightly Master', shortName: 'Nightly'})
+                    ]).then(data => {
+                        let message = '';
+                        data.forEach(text => {
+                            message = message.concat(JSON.stringify(text) + '.');
+                        });
+                        conv.ask(message);
+                        resolve();
+                    }).catch(ex => {
+                        handleError(ex, conv);
+                        resolve();
+                    });
                 });
             case 'logout':
                 return username => new Promise((resolve, reject) => {
