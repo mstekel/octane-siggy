@@ -82,7 +82,7 @@ const loginWithOctane = conv => new Promise((resolve, reject) => {
         });
 });
 
-const authenticateAndDo = (conv, intentHandler) => new Promise((resolve, reject) => {
+const authenticate = (conv) => new Promise((resolve, reject) => {
     request.post(
         {
             url: getGrantTokenUrl(),
@@ -91,7 +91,7 @@ const authenticateAndDo = (conv, intentHandler) => new Promise((resolve, reject)
         (error, response, body) => {
             if (response.statusCode !== 200) {
                 if (response.statusCode === 424) {
-                    loginWithOctane(conv).then(resolve).catch(reject);
+                    resolve(null);
                 } else {
                     reject(error);
                 }
@@ -117,7 +117,7 @@ const authenticateAndDo = (conv, intentHandler) => new Promise((resolve, reject)
                         map: true
                     });
                     const username = Buffer.from(cookies['OCTANE_USER'].value, 'base64').toString();
-                    intentHandler(username).then(resolve).catch(reject);
+                    resolve(username);
                 }).on('error', reject);
             }
         });
@@ -302,7 +302,10 @@ app.fallback(conv => {
         if (!conv.user.storage.octaneUserId) {
             return loginWithOctane(conv).catch(ex => handleError(ex, conv));
         } else {
-            return authenticateAndDo(conv, getIntentHandler(conv)).catch(ex => handleError(ex, conv));
+            return authenticate(conv).then(username => username ?
+                new Promise(resolve=>resolve(username)).then(getIntentHandler(conv)) :
+                loginWithOctane(conv)
+            ).catch(ex => handleError(ex, conv));
         }
     } catch (ex) {
         handleError(ex, conv);
