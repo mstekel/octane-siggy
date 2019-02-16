@@ -139,8 +139,13 @@ const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject)
 });
 
 const intentMap = {
-    'welcome_intent': username => new Promise((resolve, reject) => {
-        resolve({questions: ['Hi, I\'m Octane Siggy. Talk to me!']});
+    'welcome': username => new Promise((resolve, reject) => {
+        resolve({
+            questions: [
+                'Hello, I\'m Octane Siggy. Talk to me!',
+                'Say "help" for the list of commands I understand.'
+            ]
+        });
     }),
     'my_top_priority_items': username => new Promise((resolve, reject) => {
         const userQuery = Query.field('name').equal(username);
@@ -263,6 +268,13 @@ const intentMap = {
             resolve({questions: [message]});
         }).catch(reject);
     }),
+    'login': username => new Promise((resolve, reject) => {
+        resolve({
+            questions: [
+                'You have been logged in to Octane Siggy.'
+            ]
+        });
+    }),
     'logout': username => new Promise((resolve, reject) => {
         resolve({
             octaneUserId: null,
@@ -289,6 +301,24 @@ const intentMap = {
     })
 };
 
+intentMap['help'] = username => new Promise((resolve, reject) => {
+    const rows = [];
+    for (const name in intentMap) {
+        rows.push([name.replace(/_/g, ' ')]);
+    }
+    if (rows.length > 0) {
+        resolve({
+            questions: [
+                'Below is the ' + rows.length + ' commands I understand: ',
+                new Table({
+                    columns: ['Command name'],
+                    rows: rows
+                })
+            ]
+        });
+    }
+});
+
 app.fallback(conv => {
     const handleError = (err) => {
         console.error(err);
@@ -304,12 +334,15 @@ app.fallback(conv => {
             data.questions && data.questions.forEach(q => conv.ask(q));
         };
 
-        if (!conv.user.storage.octaneUserId) {
+        const intentHandler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
+            resolve({questions: ['Octane doesn\'t support your request yet. Please ask Daniel Finkelstein for more budget.']});
+        }));
+
+        if (conv.intent === 'welcome' || conv.intent === 'help') {
+            return intentHandler().then(handleQuestions).catch(handleError);
+        } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleQuestions).catch(handleError);
         } else {
-            const intentHandler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
-                resolve({questions: ['Octane doesn\'t support your request yet. Please ask Daniel Finkelstein for more budget.']});
-            }));
             return authenticate(conv.user.storage.octaneUserId).then(username => username ?
                 new Promise(resolve => resolve(username)).then(intentHandler).then(handleQuestions) :
                 loginWithOctane().then(handleQuestions)
