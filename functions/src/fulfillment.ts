@@ -232,7 +232,7 @@ const intentMap = {
                                 rows.push([users[j].name]);
                             }
                             if (rows.length > 0) {
-                                message += 'Below is the list of people who have broken the build: ';
+                                message += 'Below is the list of people who have potentially broken the build: ';
                                 resolve({
                                     questions: [
                                         message,
@@ -278,6 +278,7 @@ const intentMap = {
     'logout': username => new Promise((resolve, reject) => {
         resolve({
             octaneUserId: null,
+            octaneUsername: null,
             questions: [
                 'You have been logged out from Octane Siggy. ' +
                 'Optionally use the card below if you want to logout your browser from Octane',
@@ -327,15 +328,21 @@ app.fallback(conv => {
     };
 
     try {
+
+        console.log('============ ' + conv.user.storage.octaneUserId);
+
         const handleQuestions = data => {
             if (data.hasOwnProperty('octaneUserId')) {
                 conv.user.storage.octaneUserId = data.octaneUserId;
+            }
+            if (data.hasOwnProperty('octaneUsername')) {
+                conv.user.storage.octaneUsername = data.octaneUsername;
             }
             data.questions && data.questions.forEach(q => conv.ask(q));
         };
 
         const intentHandler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
-            resolve({questions: ['Octane doesn\'t support your request yet. Please ask Daniel Finkelstein for more budget.']});
+            resolve({questions: ['Octane doesn\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
         }));
 
         if (conv.intent === 'welcome' || conv.intent === 'help') {
@@ -343,10 +350,25 @@ app.fallback(conv => {
         } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleQuestions).catch(handleError);
         } else {
-            return authenticate(conv.user.storage.octaneUserId).then(username => username ?
-                new Promise(resolve => resolve(username)).then(intentHandler).then(handleQuestions) :
-                loginWithOctane().then(handleQuestions)
-            ).catch(handleError);
+            return (conv.user.storage.octaneUsername ? Promise.resolve(conv.user.storage.octaneUsername) : authenticate(conv.user.storage.octaneUserId)).then(username => {
+
+                console.log('============ ' + username);
+
+                conv.user.storage.octaneUsername = username;
+                return username ?
+                    intentHandler(username).then(handleQuestions).catch(err => {
+                        if (err.code === '401') {
+                            conv.user.storage.octaneUsername = null;
+                            return authenticate(conv.user.storage.octaneUserId).then(username1 => {
+                                conv.user.storage.octaneUsername = username1;
+                                return intentHandler(username1).then(handleQuestions);
+                            }).catch(handleError);
+                        } else {
+                            throw err;
+                        }
+                    }) :
+                    loginWithOctane().then(handleQuestions);
+            }).catch(handleError);
         }
     } catch (ex) {
         handleError(ex);
