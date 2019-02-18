@@ -281,13 +281,13 @@ const intentMap = {
             octaneUsername: null,
             questions: [
                 'You have been logged out from Octane Siggy. ' +
-                'Optionally use the card below if you want to logout your browser from Octane',
+                'Optionally use the card below if you want to logout your web browser from Octane',
                 new BasicCard({
-                    title: 'Logout From Octane',
-                    text: 'Use the button below to logout from Octane',
+                    title: 'Logout Your Web Browser From Octane',
+                    text: 'Use the button below to logout your browser from Octane',
                     buttons: [
                         new Button({
-                            title: 'Logout From Octane',
+                            title: 'Logout Your Web Browser From Octane',
                             action: new OpenUrlAction({
                                 url: getSignOutUrl()
                             })
