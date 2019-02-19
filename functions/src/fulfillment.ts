@@ -338,12 +338,13 @@ app.fallback(conv => {
             if (data.hasOwnProperty('octaneUsername')) {
                 conv.user.storage.octaneUsername = data.octaneUsername;
             }
+
             data.questions && data.questions.forEach(q => conv.ask(q));
         };
 
         const intentHandler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
-            resolve({questions: ['Octane doesn\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
-        }));
+                resolve({questions: ['Octane doesn\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
+            }));
 
         if (conv.intent === 'welcome' || conv.intent === 'help') {
             return intentHandler().then(handleQuestions).catch(handleError);
@@ -357,11 +358,11 @@ app.fallback(conv => {
                 conv.user.storage.octaneUsername = username;
                 return username ?
                     intentHandler(username).then(handleQuestions).catch(err => {
-                        if (err.code === '401') {
+                        if (err.code === '401' || err.code === 401) {
                             conv.user.storage.octaneUsername = null;
                             return authenticate(conv.user.storage.octaneUserId).then(username1 => {
                                 conv.user.storage.octaneUsername = username1;
-                                return intentHandler(username1).then(handleQuestions);
+                                return intentHandler(username1).then(handleQuestions).catch(() => loginWithOctane().then(handleQuestions));
                             }).catch(handleError);
                         } else {
                             throw err;
