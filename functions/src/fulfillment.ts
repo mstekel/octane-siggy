@@ -47,6 +47,7 @@ const getSignOutUrl = () => {
 const cookieSuffix = "path=/; domain=.almoctane.com; Secure;";
 
 const loginWithOctane = () => new Promise((resolve, reject) => {
+    console.log("Login started.");
     request.get(
         {
             url: getGrantTokenUrl(),
@@ -54,16 +55,18 @@ const loginWithOctane = () => new Promise((resolve, reject) => {
         (error, response, body) => {
 
             if (error) {
+                console.error("Login failed.");
                 reject(error);
             } else {
                 const responseBody = JSON.parse(body);
+                console.log("Login button created. Target URL: " + responseBody.authentication_url);
                 resolve({
                     octaneUserId: responseBody.identifier,
                     questions: [
-                        'Login With Octane',
+                        'Click the button below to login with Octane',
                         new BasicCard({
                             title: 'Login With Octane',
-                            text: 'Use the button below to open Octane Log-in Screen',
+                            text: 'Use the button below to open Octane Login Screen',
                             buttons: [
                                 new Button({
                                     title: 'Login With Octane',
@@ -80,6 +83,7 @@ const loginWithOctane = () => new Promise((resolve, reject) => {
 });
 
 const authenticate = (octaneUserId) => new Promise((resolve, reject) => {
+    console.log("Auhtentication started.");
     request.post(
         {
             url: getGrantTokenUrl(),
@@ -114,8 +118,14 @@ const authenticate = (octaneUserId) => new Promise((resolve, reject) => {
                         map: true
                     });
                     const username = Buffer.from(cookies['OCTANE_USER'].value, 'base64').toString();
+
+                    console.log('Auhtentication succeeded. Username: ' + username);
+
                     resolve(username);
-                }).on('error', reject);
+                }).on('error', (err) => {
+                    console.error('Authentication failed.');
+                    reject(err);
+                });
             }
         });
 });
@@ -287,7 +297,7 @@ const intentMap = {
                     text: 'Use the button below to logout your browser from Octane',
                     buttons: [
                         new Button({
-                            title: 'Logout Your Web Browser From Octane',
+                            title: 'Logout From Octane',
                             action: new OpenUrlAction({
                                 url: getSignOutUrl()
                             })
@@ -320,7 +330,22 @@ intentMap['help'] = username => new Promise((resolve, reject) => {
     }
 });
 
+const origConsoleLog = console.log.bind(console);
+const origConsoleError = console.error.bind(console);
+
 app.fallback(conv => {
+
+    const getLogMethod = name => (msg => {
+        return {log: origConsoleLog, error: origConsoleError}[name]({
+            message: msg,
+            userId: conv.user.storage.octaneUserId,
+            username: conv.user.storage.octaneUsername
+        });
+    });
+
+    console.log = getLogMethod('log');
+    console.error = getLogMethod('error');
+
     const handleError = (err) => {
         console.error(err);
         conv.ask('Error occurred: ' + err.message);
@@ -328,8 +353,6 @@ app.fallback(conv => {
     };
 
     try {
-
-        console.log('============ ' + conv.user.storage.octaneUserId);
 
         const handleQuestions = data => {
             if (data.hasOwnProperty('octaneUserId')) {
@@ -342,19 +365,21 @@ app.fallback(conv => {
             data.questions && data.questions.forEach(q => conv.ask(q));
         };
 
-        const intentHandler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
-                resolve({questions: ['Octane doesn\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
+        const intentHandler = user => {
+            console.log('Handling intent: ' + conv.intent);
+            const handler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
+                resolve({questions: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
             }));
+            return handler(user);
+        };
+
 
         if (conv.intent === 'welcome' || conv.intent === 'help') {
-            return intentHandler().then(handleQuestions).catch(handleError);
+            return intentHandler(conv.user.storage.octaneUsername).then(handleQuestions).catch(handleError);
         } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleQuestions).catch(handleError);
         } else {
             return (conv.user.storage.octaneUsername ? Promise.resolve(conv.user.storage.octaneUsername) : authenticate(conv.user.storage.octaneUserId)).then(username => {
-
-                console.log('============ ' + username);
-
                 conv.user.storage.octaneUsername = username;
                 return username ?
                     intentHandler(username).then(handleQuestions).catch(err => {
@@ -367,8 +392,7 @@ app.fallback(conv => {
                         } else {
                             throw err;
                         }
-                    }) :
-                    loginWithOctane().then(handleQuestions);
+                    }) : loginWithOctane().then(handleQuestions);
             }).catch(handleError);
         }
     } catch (ex) {
