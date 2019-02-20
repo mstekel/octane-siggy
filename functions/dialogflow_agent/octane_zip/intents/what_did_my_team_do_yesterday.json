@@ -1,0 +1,38 @@
+{
+  "id": "e1c194fe-1231-49aa-89b8-460eafdb5dcf",
+  "name": "what_did_my_team_do_yesterday",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "what_did_my_team_do_yesterday",
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "84122354-e516-4634-a4c2-5d5b34df8d68",
+          "required": false,
+          "dataType": "@sys.date",
+          "name": "date",
+          "value": "$date",
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1541713441,
+  "fallbackIntent": false,
+  "events": []
+}

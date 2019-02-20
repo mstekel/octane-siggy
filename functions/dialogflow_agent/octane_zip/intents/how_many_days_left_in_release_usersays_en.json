@@ -1,0 +1,50 @@
+[
+  {
+    "id": "bdd77bc6-498d-4316-85c3-6afa454f198d",
+    "data": [
+      {
+        "text": "In how many days does the release end?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539867465
+  },
+  {
+    "id": "93293946-2775-41ae-bc3c-a86086877bb3",
+    "data": [
+      {
+        "text": "How many days remained until the release end?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539867465
+  },
+  {
+    "id": "8b9713a5-4575-4a30-90cb-599d4d49c1d0",
+    "data": [
+      {
+        "text": "How many days are up to the end of the release?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539867465
+  },
+  {
+    "id": "858ea84c-9fb1-4f92-97a1-0000b891cd96",
+    "data": [
+      {
+        "text": "How many days left in the release?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539867465
+  }
+]

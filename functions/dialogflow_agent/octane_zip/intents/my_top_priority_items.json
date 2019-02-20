@@ -1,0 +1,38 @@
+{
+  "id": "57c65358-8ce6-42b0-9717-b31d736027b9",
+  "name": "my_top_priority_items",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "my_top_priority_items",
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "d9065351-41a1-4740-8da2-a65c1f467cf3",
+          "required": false,
+          "dataType": "@sys.date",
+          "name": "date",
+          "value": "$date",
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1541713430,
+  "fallbackIntent": false,
+  "events": []
+}

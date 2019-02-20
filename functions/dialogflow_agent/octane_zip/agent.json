@@ -1,0 +1,84 @@
+{
+  "description": "",
+  "language": "en",
+  "activeAssistantAgents": [
+    "smalltalk-domain-on",
+    "smalltalk-fulfillment-on"
+  ],
+  "disableInteractionLogs": false,
+  "disableStackdriverLogs": true,
+  "googleAssistant": {
+    "googleAssistantCompatible": true,
+    "project": "octane-80e95",
+    "welcomeIntentSignInRequired": false,
+    "startIntents": [
+      {
+        "intentId": "f10f08cd-1492-4c3e-93e5-c7dd8694b5c2",
+        "signInRequired": false
+      },
+      {
+        "intentId": "182fa13d-6370-492e-8adf-4e362313b2be",
+        "signInRequired": false
+      },
+      {
+        "intentId": "50b50d29-5a24-4235-ae72-ee5dda9c53cf",
+        "signInRequired": false
+      },
+      {
+        "intentId": "57c65358-8ce6-42b0-9717-b31d736027b9",
+        "signInRequired": false
+      },
+      {
+        "intentId": "e1c194fe-1231-49aa-89b8-460eafdb5dcf",
+        "signInRequired": false
+      },
+      {
+        "intentId": "1d75c7a7-a6df-41be-8ba2-f06607cdb6d1",
+        "signInRequired": false
+      },
+      {
+        "intentId": "707a6bda-0897-4c60-ad5f-02b543827d70",
+        "signInRequired": false
+      },
+      {
+        "intentId": "88d86259-04ca-449e-83da-f9dde68a8acc",
+        "signInRequired": false
+      },
+      {
+        "intentId": "ecdd4fe3-35aa-4a7a-a6ee-8016220e8b97",
+        "signInRequired": false
+      }
+    ],
+    "systemIntents": [],
+    "endIntentIds": [],
+    "oAuthLinking": {
+      "required": false,
+      "grantType": "AUTH_CODE_GRANT"
+    },
+    "voiceType": "MALE_1",
+    "capabilities": [],
+    "protocolVersion": "V2",
+    "autoPreviewEnabled": true,
+    "isDeviceAgent": false
+  },
+  "defaultTimezone": "Europe/Moscow",
+  "webhook": {
+    "url": "https://us-central1-octane-80e95.cloudfunctions.net/fulfillment",
+    "headers": {
+      "": ""
+    },
+    "available": true,
+    "useForDomains": false,
+    "cloudFunctionsEnabled": false,
+    "cloudFunctionsInitialized": true
+  },
+  "isPrivate": true,
+  "customClassifierMode": "use.after",
+  "mlMinConfidence": 0.3,
+  "supportedLanguages": [],
+  "onePlatformApiVersion": "v2",
+  "analyzeQueryTextSentiment": false,
+  "enabledKnowledgeBaseNames": [],
+  "knowledgeServiceConfidenceAdjustment": -0.4,
+  "dialogBuilderMode": false
+}

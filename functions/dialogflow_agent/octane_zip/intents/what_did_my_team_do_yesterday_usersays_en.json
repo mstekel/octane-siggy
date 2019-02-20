@@ -1,0 +1,148 @@
+[
+  {
+    "id": "66288730-7ad1-41c7-a731-9c8d974a8cc7",
+    "data": [
+      {
+        "text": "Give the the progress of my team for ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539855704
+  },
+  {
+    "id": "6cdef142-81eb-432a-9dc3-241aff8f2c35",
+    "data": [
+      {
+        "text": "What was the progress of my team for ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539855681
+  },
+  {
+    "id": "8bc475ac-182f-4242-b559-ec52e1cdd4ed",
+    "data": [
+      {
+        "text": "Any chance to get the picture of the work of my colleagues for ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539855681
+  },
+  {
+    "id": "da6e2a57-d70c-4f8c-a259-2bedfd844577",
+    "data": [
+      {
+        "text": "I\u0027d like to get familiar with the tasks fulfilled by my team ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539855681
+  },
+  {
+    "id": "604e4b77-ccb5-4b63-a6a5-9f8898eb79ff",
+    "data": [
+      {
+        "text": "Can you present me the work done by my team ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539855681
+  },
+  {
+    "id": "e7cc001f-9828-4631-97fa-8f72cbaa85c6",
+    "data": [
+      {
+        "text": "Which tasks were the members of my team dealing with ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday?",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539855681
+  },
+  {
+    "id": "d6362f35-8d03-4058-9f2f-c3a749f39629",
+    "data": [
+      {
+        "text": "What did my team do ",
+        "userDefined": false
+      },
+      {
+        "text": "yesterday",
+        "alias": "date",
+        "meta": "@sys.date",
+        "userDefined": false
+      },
+      {
+        "text": "?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 1,
+    "updated": 1539855681
+  }
+]

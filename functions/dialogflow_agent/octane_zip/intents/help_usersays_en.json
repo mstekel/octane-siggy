@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ab288ff3-131e-4507-b7c5-f2dd6634a106",
+    "data": [
+      {
+        "text": "list supported actions",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549977475
+  },
+  {
+    "id": "e036ae87-1d06-4c62-a2d1-f5171845d3c5",
+    "data": [
+      {
+        "text": "what are the supported commands?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549977475
+  },
+  {
+    "id": "81240a42-ad51-4b11-822d-fa413f56cce2",
+    "data": [
+      {
+        "text": "what can you do?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549977475
+  },
+  {
+    "id": "df4fec41-001c-4fbe-8051-d0197a1e305c",
+    "data": [
+      {
+        "text": "enumerate commands",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549977475
+  },
+  {
+    "id": "31ff604b-72ed-4a34-aedc-dabfcf749cb9",
+    "data": [
+      {
+        "text": "list commands",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549977475
+  },
+  {
+    "id": "b62a2377-3015-4dcb-ab3d-8687dc77a882",
+    "data": [
+      {
+        "text": "help",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549977475
+  }
+]

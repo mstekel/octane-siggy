@@ -1,0 +1,98 @@
+[
+  {
+    "id": "cb6b359a-6b73-480e-9af0-7e6a441c6c8b",
+    "data": [
+      {
+        "text": "log out",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549755122
+  },
+  {
+    "id": "cb86dcee-804c-4a28-981a-4d64ab63d230",
+    "data": [
+      {
+        "text": "different user",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  },
+  {
+    "id": "4394de9b-7ca0-47eb-9a07-9de499bc2444",
+    "data": [
+      {
+        "text": "reset user",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  },
+  {
+    "id": "d46546e4-fb44-49b7-be85-7e09182ea721",
+    "data": [
+      {
+        "text": "forget login",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  },
+  {
+    "id": "bd393d59-473f-446d-9115-4ca83a34b79b",
+    "data": [
+      {
+        "text": "cancel login",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  },
+  {
+    "id": "1b93ed84-8f6a-4579-a376-aaf936a2bd64",
+    "data": [
+      {
+        "text": "disconnect",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  },
+  {
+    "id": "8a9f95c3-1ee1-4913-98a3-e2c5b8e7e936",
+    "data": [
+      {
+        "text": "get out",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  },
+  {
+    "id": "cf5b554c-4c2b-4dc8-9d5b-b99ca782ab6f",
+    "data": [
+      {
+        "text": "logout",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1549754174
+  }
+]

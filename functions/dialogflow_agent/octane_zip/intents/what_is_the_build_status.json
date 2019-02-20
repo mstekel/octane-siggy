@@ -1,0 +1,29 @@
+{
+  "id": "f10f08cd-1492-4c3e-93e5-c7dd8694b5c2",
+  "name": "what_is_the_build_status",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "what_is_the_build_status",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1541713451,
+  "fallbackIntent": false,
+  "events": []
+}

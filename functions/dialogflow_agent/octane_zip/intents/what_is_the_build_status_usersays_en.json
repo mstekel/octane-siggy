@@ -1,0 +1,122 @@
+[
+  {
+    "id": "58f3b57c-324c-43b4-9ab4-68ff46f6d1f7",
+    "data": [
+      {
+        "text": "Any status of the build?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "96b84e28-864b-48f0-880f-71101c8088ca",
+    "data": [
+      {
+        "text": "What\u0027s happening with the build?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "2d03ddff-fee7-453e-ac7a-da7c15b1c26e",
+    "data": [
+      {
+        "text": "What\u0027s going on with the build?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "b47d8c27-8bfb-4a1c-9419-3aa92f68bca9",
+    "data": [
+      {
+        "text": "I\u0027m interested to know the build status",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "76055dfb-5095-46da-830c-c94b72ea7b09",
+    "data": [
+      {
+        "text": "Display please the build status",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "1e8b523d-bcac-40b0-80f9-80a0fb9a774f",
+    "data": [
+      {
+        "text": "Show me the status of the build",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "9a24d242-701c-4ca9-91fe-d727154ecb80",
+    "data": [
+      {
+        "text": "Does anybody know the build progress status?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "ec165aa5-f8f8-4ec5-b244-cc02f0afe1b7",
+    "data": [
+      {
+        "text": "What is the state of the build procedure?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "93df0fb9-67ad-40e4-900a-355c76bc390a",
+    "data": [
+      {
+        "text": "Can you share the build status, please?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  },
+  {
+    "id": "2299ebc1-7e65-4b63-869f-57d5cec20e5e",
+    "data": [
+      {
+        "text": "Please send me the status of the build",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1539854703
+  }
+]

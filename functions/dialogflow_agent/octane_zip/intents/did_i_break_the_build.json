@@ -1,0 +1,29 @@
+{
+  "id": "50b50d29-5a24-4235-ae72-ee5dda9c53cf",
+  "name": "did_i_break_the_build",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "did_i_break_the_build",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1541713405,
+  "fallbackIntent": false,
+  "events": []
+}

@@ -1,0 +1,29 @@
+{
+  "id": "ecdd4fe3-35aa-4a7a-a6ee-8016220e8b97",
+  "name": "login",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1549977366,
+  "fallbackIntent": false,
+  "events": []
+}

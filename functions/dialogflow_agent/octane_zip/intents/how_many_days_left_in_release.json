@@ -1,0 +1,29 @@
+{
+  "id": "182fa13d-6370-492e-8adf-4e362313b2be",
+  "name": "how_many_days_left_in_release",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "how_many_days_left_in_release",
+      "affectedContexts": [],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1541713420,
+  "fallbackIntent": false,
+  "events": []
+}
