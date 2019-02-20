@@ -1,14 +1,23 @@
 {
-  "id": "182fa13d-6370-492e-8adf-4e362313b2be",
-  "name": "how_many_days_left_in_release",
+  "id": "e1c194fe-1231-49aa-89b8-460eafdb5dcf",
+  "name": "what-did-my-team-recently-do",
   "auto": true,
   "contexts": [],
   "responses": [
     {
       "resetContexts": false,
-      "action": "how_many_days_left_in_release",
+      "action": "",
       "affectedContexts": [],
-      "parameters": [],
+      "parameters": [
+        {
+          "id": "84122354-e516-4634-a4c2-5d5b34df8d68",
+          "required": false,
+          "dataType": "@sys.date",
+          "name": "date",
+          "value": "$date",
+          "isList": false
+        }
+      ],
       "messages": [
         {
           "type": 0,
@@ -23,7 +32,7 @@
   "priority": 500000,
   "webhookUsed": true,
   "webhookForSlotFilling": false,
-  "lastUpdate": 1541713420,
+  "lastUpdate": 1550693835,
   "fallbackIntent": false,
   "events": []
 }

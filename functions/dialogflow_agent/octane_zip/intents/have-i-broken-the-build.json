@@ -1,11 +1,12 @@
 {
-  "id": "1d75c7a7-a6df-41be-8ba2-f06607cdb6d1",
-  "name": "who_am_i",
+  "id": "50b50d29-5a24-4235-ae72-ee5dda9c53cf",
+  "name": "have-i-broken-the-build",
   "auto": true,
   "contexts": [],
   "responses": [
     {
       "resetContexts": false,
+      "action": "",
       "affectedContexts": [],
       "parameters": [],
       "messages": [
@@ -22,7 +23,7 @@
   "priority": 500000,
   "webhookUsed": true,
   "webhookForSlotFilling": false,
-  "lastUpdate": 1549753873,
+  "lastUpdate": 1550693494,
   "fallbackIntent": false,
   "events": []
 }

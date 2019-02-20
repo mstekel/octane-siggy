@@ -1,12 +1,12 @@
 {
-  "id": "50b50d29-5a24-4235-ae72-ee5dda9c53cf",
-  "name": "did_i_break_the_build",
+  "id": "f10f08cd-1492-4c3e-93e5-c7dd8694b5c2",
+  "name": "what-is-the-build-status",
   "auto": true,
   "contexts": [],
   "responses": [
     {
       "resetContexts": false,
-      "action": "did_i_break_the_build",
+      "action": "",
       "affectedContexts": [],
       "parameters": [],
       "messages": [
@@ -23,7 +23,7 @@
   "priority": 500000,
   "webhookUsed": true,
   "webhookForSlotFilling": false,
-  "lastUpdate": 1541713405,
+  "lastUpdate": 1550693765,
   "fallbackIntent": false,
   "events": []
 }

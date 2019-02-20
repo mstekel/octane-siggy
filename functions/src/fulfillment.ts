@@ -149,7 +149,7 @@ const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject)
 });
 
 const intentMap = {
-    'welcome': username => new Promise((resolve, reject) => {
+    'welcome': username => new Promise(resolve => {
         resolve({
             questions: [
                 'Hello, I\'m Octane Siggy. Talk to me!',
@@ -157,7 +157,7 @@ const intentMap = {
             ]
         });
     }),
-    'my_top_priority_items': username => new Promise((resolve, reject) => {
+    'my-top-priority-items': username => new Promise((resolve, reject) => {
         const userQuery = Query.field('name').equal(username);
         const query = Query.field('owner').equal(userQuery)
             .and().field('subtype').inComparison(['defect', 'story'])
@@ -175,7 +175,7 @@ const intentMap = {
                 let defectCount = 0,
                     storyCount = 0;
                 for (const i in items) {
-                    if (items[i].subtype) {
+                    if (items.hasOwnProperty(i) && items[i].subtype) {
                         if (items[i].subtype === 'defect')
                             defectCount++;
                         else if (items[i].subtype === 'story')
@@ -211,7 +211,7 @@ const intentMap = {
             }
         });
     }),
-    'did_i_break_the_build': username => new Promise((resolve, reject) => {
+    'have-i-broken-the-build': username => new Promise((resolve, reject) => {
         const query1 = Query.field('subtype').inComparison(['gherkin_automated_run', 'run_automated'])
             .and().field('latest_pipeline_run').equal(true).and().field('merged_on_it').notEqual(Query.NONE);
         octane.runs.getAll({
@@ -223,7 +223,7 @@ const intentMap = {
                 let youBrokeTheBuild = false;
                 const userIds = [];
                 for (const i in items) {
-                    if (items[i].merged_on_it) {
+                    if (items.hasOwnProperty(i) && items[i].merged_on_it) {
                         youBrokeTheBuild = youBrokeTheBuild || username === items[i].merged_on_it.name;
                         userIds.push(items[i].merged_on_it.id);
                     }
@@ -239,7 +239,9 @@ const intentMap = {
                         } else {
                             const rows = [];
                             for (const j in users) {
-                                rows.push([users[j].name]);
+                                if(users.hasOwnProperty(j)) {
+                                    rows.push([users[j].name]);
+                                }
                             }
                             if (rows.length > 0) {
                                 message += 'Below is the list of people who have potentially broken the build: ';
@@ -265,7 +267,7 @@ const intentMap = {
             }
         });
     }),
-    'what_is_the_build_status': username => new Promise((resolve, reject) => {
+    'what-is-the-build-status': username => new Promise((resolve, reject) => {
         Promise.all([
             getLastRunStatusByPipelineName({name: 'ALM Octane Quick Master', shortName: 'Quick'}),
             getLastRunStatusByPipelineName({name: 'ALM Octane Full Master', shortName: 'Full'}),
@@ -278,14 +280,14 @@ const intentMap = {
             resolve({questions: [message]});
         }).catch(reject);
     }),
-    'login': username => new Promise((resolve, reject) => {
+    'login': username => new Promise(resolve => {
         resolve({
             questions: [
                 'You have been logged in to Octane Siggy.'
             ]
         });
     }),
-    'logout': username => new Promise((resolve, reject) => {
+    'logout': username => new Promise(resolve => {
         resolve({
             octaneUserId: null,
             octaneUsername: null,
@@ -307,15 +309,15 @@ const intentMap = {
             ]
         });
     }),
-    'who_am_i': username => new Promise((resolve, reject) => {
+    'who-am-i': username => new Promise(resolve => {
         resolve({questions: ['Your username is ' + username]});
     })
 };
 
-intentMap['help'] = username => new Promise((resolve, reject) => {
+intentMap['help'] = username => new Promise(resolve => {
     const rows = [];
     for (const name in intentMap) {
-        rows.push([name.replace(/_/g, ' ')]);
+        rows.push([name.replace(/-/g, ' ')]);
     }
     if (rows.length > 0) {
         resolve({
@@ -367,7 +369,7 @@ app.fallback(conv => {
 
         const intentHandler = user => {
             console.log('Handling intent: ' + conv.intent);
-            const handler = intentMap[conv.intent] || (username => new Promise((resolve, reject) => {
+            const handler = intentMap[conv.intent] || (username => new Promise(resolve => {
                 resolve({questions: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
             }));
             return handler(user);

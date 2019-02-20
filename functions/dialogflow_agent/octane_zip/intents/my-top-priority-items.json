@@ -1,14 +1,23 @@
 {
-  "id": "f10f08cd-1492-4c3e-93e5-c7dd8694b5c2",
-  "name": "what_is_the_build_status",
+  "id": "57c65358-8ce6-42b0-9717-b31d736027b9",
+  "name": "my-top-priority-items",
   "auto": true,
   "contexts": [],
   "responses": [
     {
       "resetContexts": false,
-      "action": "what_is_the_build_status",
+      "action": "",
       "affectedContexts": [],
-      "parameters": [],
+      "parameters": [
+        {
+          "id": "d9065351-41a1-4740-8da2-a65c1f467cf3",
+          "required": false,
+          "dataType": "@sys.date",
+          "name": "date",
+          "value": "$date",
+          "isList": false
+        }
+      ],
       "messages": [
         {
           "type": 0,
@@ -23,7 +32,7 @@
   "priority": 500000,
   "webhookUsed": true,
   "webhookForSlotFilling": false,
-  "lastUpdate": 1541713451,
+  "lastUpdate": 1550693605,
   "fallbackIntent": false,
   "events": []
 }
