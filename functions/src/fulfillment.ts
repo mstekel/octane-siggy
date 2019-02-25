@@ -62,7 +62,7 @@ const loginWithOctane = () => new Promise((resolve, reject) => {
                 console.log("Login button created. Target URL: " + responseBody.authentication_url);
                 resolve({
                     octaneUserId: responseBody.identifier,
-                    questions: [
+                    answers: [
                         'Click the button below to login with Octane',
                         new BasicCard({
                             title: 'Login With Octane',
@@ -151,7 +151,7 @@ const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject)
 const intentMap = {
     'welcome': username => new Promise(resolve => {
         resolve({
-            questions: [
+            answers: [
                 'Hello, I\'m Octane Siggy. Talk to me!',
                 'Say "help" for the list of commands I understand.'
             ]
@@ -196,7 +196,7 @@ const intentMap = {
 
                 if (rows.length > 0) {
                     resolve({
-                        questions: [
+                        answers: [
                             message + ' Below is the list: ',
                             new Table({
                                 dividers: true,
@@ -206,7 +206,7 @@ const intentMap = {
                         ]
                     });
                 } else {
-                    resolve({questions: [message]});
+                    resolve({answers: [message]});
                 }
             }
         });
@@ -239,14 +239,14 @@ const intentMap = {
                         } else {
                             const rows = [];
                             for (const j in users) {
-                                if(users.hasOwnProperty(j)) {
+                                if (users.hasOwnProperty(j)) {
                                     rows.push([users[j].name]);
                                 }
                             }
                             if (rows.length > 0) {
                                 message += 'Below is the list of people who have potentially broken the build: ';
                                 resolve({
-                                    questions: [
+                                    answers: [
                                         message,
                                         new Table({
                                             dividers: true,
@@ -256,13 +256,13 @@ const intentMap = {
                                     ]
                                 });
                             } else {
-                                resolve({questions: [message]});
+                                resolve({answers: [message]});
                             }
                         }
                     });
                 } else {
                     message += ' No build breakers were found at all.';
-                    resolve({questions: [message]});
+                    resolve({answers: [message]});
                 }
             }
         });
@@ -277,12 +277,12 @@ const intentMap = {
             data.forEach(text => {
                 message = message.concat(JSON.stringify(text) + '.\n');
             });
-            resolve({questions: [message]});
+            resolve({answers: [message]});
         }).catch(reject);
     }),
     'login': username => new Promise(resolve => {
         resolve({
-            questions: [
+            answers: [
                 'You have been logged in to Octane Siggy.'
             ]
         });
@@ -291,7 +291,7 @@ const intentMap = {
         resolve({
             octaneUserId: null,
             octaneUsername: null,
-            questions: [
+            answers: [
                 'You have been logged out from Octane Siggy. ' +
                 'Optionally use the card below if you want to logout your web browser from Octane',
                 new BasicCard({
@@ -310,7 +310,7 @@ const intentMap = {
         });
     }),
     'who-am-i': username => new Promise(resolve => {
-        resolve({questions: ['Your username is ' + username]});
+        resolve({answers: ['Your username is ' + username]});
     })
 };
 
@@ -321,7 +321,7 @@ intentMap['help'] = username => new Promise(resolve => {
     }
     if (rows.length > 0) {
         resolve({
-            questions: [
+            answers: [
                 'Below is the ' + rows.length + ' commands I understand: ',
                 new Table({
                     columns: ['Command name'],
@@ -356,7 +356,8 @@ app.fallback(conv => {
 
     try {
 
-        const handleQuestions = data => {
+        const handleAnswers = data => {
+
             if (data.hasOwnProperty('octaneUserId')) {
                 conv.user.storage.octaneUserId = data.octaneUserId;
             }
@@ -364,37 +365,41 @@ app.fallback(conv => {
                 conv.user.storage.octaneUsername = data.octaneUsername;
             }
 
-            data.questions && data.questions.forEach(q => conv.ask(q));
+            if (data.answers) {
+                data.answers.forEach(q => conv.ask(q));
+            }
         };
 
         const intentHandler = user => {
             console.log('Handling intent: ' + conv.intent);
+            console.log('Input:' + JSON.stringify(conv.input));
+            console.log('Input context: ' + JSON.stringify(conv.contexts.input));
+            console.log('Output context: ' + JSON.stringify(conv.contexts.output))
             const handler = intentMap[conv.intent] || (username => new Promise(resolve => {
-                resolve({questions: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
+                resolve({answers: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
             }));
             return handler(user);
         };
 
-
         if (conv.intent === 'welcome' || conv.intent === 'help') {
-            return intentHandler(conv.user.storage.octaneUsername).then(handleQuestions).catch(handleError);
+            return intentHandler(conv.user.storage.octaneUsername).then(handleAnswers).catch(handleError);
         } else if (!conv.user.storage.octaneUserId) {
-            return loginWithOctane().then(handleQuestions).catch(handleError);
+            return loginWithOctane().then(handleAnswers).catch(handleError);
         } else {
             return (conv.user.storage.octaneUsername ? Promise.resolve(conv.user.storage.octaneUsername) : authenticate(conv.user.storage.octaneUserId)).then(username => {
                 conv.user.storage.octaneUsername = username;
                 return username ?
-                    intentHandler(username).then(handleQuestions).catch(err => {
+                    intentHandler(username).then(handleAnswers).catch(err => {
                         if (err.code === '401' || err.code === 401) {
                             conv.user.storage.octaneUsername = null;
                             return authenticate(conv.user.storage.octaneUserId).then(username1 => {
                                 conv.user.storage.octaneUsername = username1;
-                                return intentHandler(username1).then(handleQuestions).catch(() => loginWithOctane().then(handleQuestions));
+                                return intentHandler(username1).then(handleAnswers).catch(() => loginWithOctane().then(handleAnswers));
                             }).catch(handleError);
                         } else {
                             throw err;
                         }
-                    }) : loginWithOctane().then(handleQuestions);
+                    }) : loginWithOctane().then(handleAnswers);
             }).catch(handleError);
         }
     } catch (ex) {
