@@ -1,3 +1,5 @@
+import {Parameters} from "actions-on-google";
+
 const {
     dialogflow,
     Table,
@@ -5,6 +7,7 @@ const {
     BasicCard,
     Button
 } = require('actions-on-google');
+
 const functions = require('firebase-functions');
 const app = dialogflow();
 const Octane = require('@microfocus/alm-octane-js-rest-sdk');
@@ -21,6 +24,12 @@ const octane = new Octane({
     workspace_id: 1002,
     routesConfig: routesConfig,
 });
+
+interface IntentHandlerInput {
+    username: string;
+    parameters: Parameters;
+}
+
 
 const host = octane.config.host || octane.constants.host;
 const protocol = octane.config.protocol || octane.constants.protocol || 'http';
@@ -149,7 +158,7 @@ const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject)
 });
 
 const intentMap = {
-    'welcome': data => new Promise(resolve => {
+    'welcome': (data: IntentHandlerInput) => new Promise(resolve => {
         resolve({
             answers: [
                 'Hello, I\'m Octane Siggy. Talk to me!',
@@ -157,7 +166,7 @@ const intentMap = {
             ]
         });
     }),
-    'my-top-priority-items': data => new Promise((resolve, reject) => {
+    'my-top-priority-items': (data: IntentHandlerInput) => new Promise((resolve, reject) => {
         const userQuery = Query.field('name').equal(data.username);
         const query = Query.field('owner').equal(userQuery)
             .and().field('subtype').inComparison(['defect', 'story'])
@@ -211,7 +220,7 @@ const intentMap = {
             }
         });
     }),
-    'have-i-broken-the-build': data => new Promise((resolve, reject) => {
+    'have-i-broken-the-build': (data: IntentHandlerInput) => new Promise((resolve, reject) => {
         const query1 = Query.field('subtype').inComparison(['gherkin_automated_run', 'run_automated'])
             .and().field('latest_pipeline_run').equal(true).and().field('merged_on_it').notEqual(Query.NONE);
         octane.runs.getAll({
@@ -267,7 +276,7 @@ const intentMap = {
             }
         });
     }),
-    'what-is-the-build-status': data => new Promise((resolve, reject) => {
+    'what-is-the-build-status': (data: IntentHandlerInput) => new Promise((resolve, reject) => {
         Promise.all([
             getLastRunStatusByPipelineName({name: 'ALM Octane Quick Master', shortName: 'Quick'}),
             getLastRunStatusByPipelineName({name: 'ALM Octane Full Master', shortName: 'Full'}),
@@ -280,14 +289,14 @@ const intentMap = {
             resolve({answers: [message]});
         }).catch(reject);
     }),
-    'login': data => new Promise(resolve => {
+    'login': (data: IntentHandlerInput) => new Promise(resolve => {
         resolve({
             answers: [
                 'You have been logged in to Octane Siggy.'
             ]
         });
     }),
-    'logout': data => new Promise(resolve => {
+    'logout': (data: IntentHandlerInput) => new Promise(resolve => {
         resolve({
             octaneUserId: null,
             octaneUsername: null,
@@ -309,17 +318,18 @@ const intentMap = {
             ]
         });
     }),
-    'who-am-i': data => new Promise(resolve => {
+    'who-am-i': (data: IntentHandlerInput) => new Promise(resolve => {
         resolve({answers: ['Your username is ' + data.username]});
     }),
-    'create-new-workitem': data => new Promise(resolve => {
+    'create-new-workitem': (data: IntentHandlerInput) => new Promise(resolve => {
         resolve({
-            answers: ['Please specify the name'],
+            answers: ['Please specify the name of the ' + data.parameters.type ],
             context: {
                 name: 'expecting-slot',
                 lifespan: 1,
                 parameters: {
                     action: 'create',
+                    type: data.parameters.type,
                     entity: {},
                     slots: ['name', 'severity', 'priority']
                 }
@@ -327,10 +337,6 @@ const intentMap = {
         });
     })
 };
-
-interface IntentHandlerInput {
-    username: string;
-}
 
 intentMap['help'] = data => new Promise(resolve => {
     const rows = [];
@@ -354,6 +360,12 @@ const origConsoleLog = console.log.bind(console);
 const origConsoleError = console.error.bind(console);
 
 app.fallback(conv => {
+
+    console.log('Handling intent: ' + conv.intent);
+    console.log('Input: ' + JSON.stringify(conv.input));
+    console.log('Parameters: ' + JSON.stringify(conv.parameters));
+    console.log('Input context: ' + JSON.stringify(conv.contexts.input));
+    console.log('Output context: ' + JSON.stringify(conv.contexts.output));
 
     const getLogMethod = name => (msg => {
         return {log: origConsoleLog, error: origConsoleError}[name]({
@@ -392,11 +404,7 @@ app.fallback(conv => {
             }
         };
 
-        const intentHandler = data => {
-            console.log('Handling intent: ' + conv.intent);
-            console.log('Input:' + JSON.stringify(conv.input));
-            console.log('Input context: ' + JSON.stringify(conv.contexts.input));
-            console.log('Output context: ' + JSON.stringify(conv.contexts.output));
+        const intentHandler = (data: IntentHandlerInput) => {
             const handler = intentMap[conv.intent]
                 || (data1 => new Promise(resolve => {
                     resolve({answers: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
@@ -406,32 +414,34 @@ app.fallback(conv => {
 
         // here Siggy already asked for a parameter and she should decide if she need the next one
         if (conv.contexts.input['expecting-slot']) {
-            return Promise.resolve({ username: conv.user.storage.octaneUsername }).then(() => {
+            return Promise.resolve({ username: conv.user.storage.octaneUsername, parameters: conv.parameters }).then((data: IntentHandlerInput) => {
                 const parameters = conv.contexts.input['expecting-slot'].parameters;
                 parameters.entity[parameters.slots[0]] = conv.input.raw;
                 parameters.slots = (parameters.slots as Array<string>).slice(1);
                 if ((parameters.slots as Array<string>).length > 0) {
                     // here Siggy needs the next parameter
                     conv.contexts.set('expecting-slot', 1, parameters);
-                    conv.ask('Specify the ' + parameters.slots[0]);
+                    conv.ask('Please specify the ' + parameters.slots[0] + ' of the ' + parameters.type);
                 } else {
                     // all the parameters have beed provided
                     conv.ask('Created!!!\n' + JSON.stringify(parameters.entity));
                 }
             });
         } else if (conv.intent === 'welcome' || conv.intent === 'help') {
-            return intentHandler({ username: conv.user.storage.octaneUsername }).then(handleAnswers).catch(handleError);
+            return intentHandler({ username: conv.user.storage.octaneUsername, parameters: conv.parameters }).then(handleAnswers).catch(handleError);
         } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleAnswers).catch(handleError);
         } else {
             return (conv.user.storage.octaneUsername ? Promise.resolve({ username: conv.user.storage.octaneUsername }) : authenticate(conv.user.storage.octaneUserId)).then((data: IntentHandlerInput) => {
                 conv.user.storage.octaneUsername = data.username;
+                data.parameters = conv.parameters;
                 return data.username ?
                     intentHandler(data).then(handleAnswers).catch(err => {
                         if (err.code === '401' || err.code === 401) {
                             conv.user.storage.octaneUsername = null;
                             return authenticate(conv.user.storage.octaneUserId).then((data1: IntentHandlerInput) => {
                                 conv.user.storage.octaneUsername = data1.username;
+                                data1.parameters = conv.parameters;
                                 return intentHandler(data1).then(handleAnswers).catch(() => loginWithOctane().then(handleAnswers));
                             }).catch(handleError);
                         } else {
