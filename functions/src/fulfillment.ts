@@ -92,7 +92,7 @@ const authenticate = (octaneUserId) => new Promise((resolve, reject) => {
         (error, response, body) => {
             if (response.statusCode !== 200) {
                 if (response.statusCode === 424) {
-                    resolve(null);
+                    resolve({ username: null });
                 } else {
                     reject(error);
                 }
@@ -121,7 +121,7 @@ const authenticate = (octaneUserId) => new Promise((resolve, reject) => {
 
                     console.log('Auhtentication succeeded. Username: ' + username);
 
-                    resolve(username);
+                    resolve({ username: username });
                 }).on('error', (err) => {
                     console.error('Authentication failed.');
                     reject(err);
@@ -149,7 +149,7 @@ const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject)
 });
 
 const intentMap = {
-    'welcome': username => new Promise(resolve => {
+    'welcome': data => new Promise(resolve => {
         resolve({
             answers: [
                 'Hello, I\'m Octane Siggy. Talk to me!',
@@ -157,8 +157,8 @@ const intentMap = {
             ]
         });
     }),
-    'my-top-priority-items': username => new Promise((resolve, reject) => {
-        const userQuery = Query.field('name').equal(username);
+    'my-top-priority-items': data => new Promise((resolve, reject) => {
+        const userQuery = Query.field('name').equal(data.username);
         const query = Query.field('owner').equal(userQuery)
             .and().field('subtype').inComparison(['defect', 'story'])
             .and().field('phase').equal(Query.field('logical_name')
@@ -211,7 +211,7 @@ const intentMap = {
             }
         });
     }),
-    'have-i-broken-the-build': username => new Promise((resolve, reject) => {
+    'have-i-broken-the-build': data => new Promise((resolve, reject) => {
         const query1 = Query.field('subtype').inComparison(['gherkin_automated_run', 'run_automated'])
             .and().field('latest_pipeline_run').equal(true).and().field('merged_on_it').notEqual(Query.NONE);
         octane.runs.getAll({
@@ -224,7 +224,7 @@ const intentMap = {
                 const userIds = [];
                 for (const i in items) {
                     if (items.hasOwnProperty(i) && items[i].merged_on_it) {
-                        youBrokeTheBuild = youBrokeTheBuild || username === items[i].merged_on_it.name;
+                        youBrokeTheBuild = youBrokeTheBuild || data.username === items[i].merged_on_it.name;
                         userIds.push(items[i].merged_on_it.id);
                     }
                 }
@@ -267,27 +267,27 @@ const intentMap = {
             }
         });
     }),
-    'what-is-the-build-status': username => new Promise((resolve, reject) => {
+    'what-is-the-build-status': data => new Promise((resolve, reject) => {
         Promise.all([
             getLastRunStatusByPipelineName({name: 'ALM Octane Quick Master', shortName: 'Quick'}),
             getLastRunStatusByPipelineName({name: 'ALM Octane Full Master', shortName: 'Full'}),
             getLastRunStatusByPipelineName({name: 'MQM Root OP Nightly Master', shortName: 'Nightly'})
-        ]).then(data => {
+        ]).then(data1 => {
             let message = '';
-            data.forEach(text => {
+            data1.forEach(text => {
                 message = message.concat(JSON.stringify(text) + '.\n');
             });
             resolve({answers: [message]});
         }).catch(reject);
     }),
-    'login': username => new Promise(resolve => {
+    'login': data => new Promise(resolve => {
         resolve({
             answers: [
                 'You have been logged in to Octane Siggy.'
             ]
         });
     }),
-    'logout': username => new Promise(resolve => {
+    'logout': data => new Promise(resolve => {
         resolve({
             octaneUserId: null,
             octaneUsername: null,
@@ -309,12 +309,30 @@ const intentMap = {
             ]
         });
     }),
-    'who-am-i': username => new Promise(resolve => {
-        resolve({answers: ['Your username is ' + username]});
+    'who-am-i': data => new Promise(resolve => {
+        resolve({answers: ['Your username is ' + data.username]});
+    }),
+    'create-new-workitem': data => new Promise(resolve => {
+        resolve({
+            answers: ['Please specify the name'],
+            context: {
+                name: 'expecting-slot',
+                lifespan: 1,
+                parameters: {
+                    action: 'create',
+                    entity: {},
+                    slots: ['name', 'severity', 'priority']
+                }
+            }
+        });
     })
 };
 
-intentMap['help'] = username => new Promise(resolve => {
+interface IntentHandlerInput {
+    username: string;
+}
+
+intentMap['help'] = data => new Promise(resolve => {
     const rows = [];
     for (const name in intentMap) {
         rows.push([name.replace(/-/g, ' ')]);
@@ -365,36 +383,56 @@ app.fallback(conv => {
                 conv.user.storage.octaneUsername = data.octaneUsername;
             }
 
+            if (data.context) {
+                conv.contexts.set(data.context.name, data.context.lifespan, data.context.parameters);
+            }
+
             if (data.answers) {
                 data.answers.forEach(q => conv.ask(q));
             }
         };
 
-        const intentHandler = user => {
+        const intentHandler = data => {
             console.log('Handling intent: ' + conv.intent);
             console.log('Input:' + JSON.stringify(conv.input));
             console.log('Input context: ' + JSON.stringify(conv.contexts.input));
-            console.log('Output context: ' + JSON.stringify(conv.contexts.output))
-            const handler = intentMap[conv.intent] || (username => new Promise(resolve => {
-                resolve({answers: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
-            }));
-            return handler(user);
+            console.log('Output context: ' + JSON.stringify(conv.contexts.output));
+            const handler = intentMap[conv.intent]
+                || (data1 => new Promise(resolve => {
+                    resolve({answers: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
+                }));
+            return handler(data);
         };
 
-        if (conv.intent === 'welcome' || conv.intent === 'help') {
-            return intentHandler(conv.user.storage.octaneUsername).then(handleAnswers).catch(handleError);
+        // here Siggy already asked for a parameter and she should decide if she need the next one
+        if (conv.contexts.input['expecting-slot']) {
+            return Promise.resolve({ username: conv.user.storage.octaneUsername }).then(() => {
+                const parameters = conv.contexts.input['expecting-slot'].parameters;
+                parameters.entity[parameters.slots[0]] = conv.input.raw;
+                parameters.slots = (parameters.slots as Array<string>).slice(1);
+                if ((parameters.slots as Array<string>).length > 0) {
+                    // here Siggy needs the next parameter
+                    conv.contexts.set('expecting-slot', 1, parameters);
+                    conv.ask('Specify the ' + parameters.slots[0]);
+                } else {
+                    // all the parameters have beed provided
+                    conv.ask('Created!!!\n' + JSON.stringify(parameters.entity));
+                }
+            });
+        } else if (conv.intent === 'welcome' || conv.intent === 'help') {
+            return intentHandler({ username: conv.user.storage.octaneUsername }).then(handleAnswers).catch(handleError);
         } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleAnswers).catch(handleError);
         } else {
-            return (conv.user.storage.octaneUsername ? Promise.resolve(conv.user.storage.octaneUsername) : authenticate(conv.user.storage.octaneUserId)).then(username => {
-                conv.user.storage.octaneUsername = username;
-                return username ?
-                    intentHandler(username).then(handleAnswers).catch(err => {
+            return (conv.user.storage.octaneUsername ? Promise.resolve({ username: conv.user.storage.octaneUsername }) : authenticate(conv.user.storage.octaneUserId)).then((data: IntentHandlerInput) => {
+                conv.user.storage.octaneUsername = data.username;
+                return data.username ?
+                    intentHandler(data).then(handleAnswers).catch(err => {
                         if (err.code === '401' || err.code === 401) {
                             conv.user.storage.octaneUsername = null;
-                            return authenticate(conv.user.storage.octaneUserId).then(username1 => {
-                                conv.user.storage.octaneUsername = username1;
-                                return intentHandler(username1).then(handleAnswers).catch(() => loginWithOctane().then(handleAnswers));
+                            return authenticate(conv.user.storage.octaneUserId).then((data1: IntentHandlerInput) => {
+                                conv.user.storage.octaneUsername = data1.username;
+                                return intentHandler(data1).then(handleAnswers).catch(() => loginWithOctane().then(handleAnswers));
                             }).catch(handleError);
                         } else {
                             throw err;

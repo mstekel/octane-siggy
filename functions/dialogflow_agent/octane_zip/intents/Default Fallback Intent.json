@@ -22,7 +22,7 @@
   "priority": 500000,
   "webhookUsed": true,
   "webhookForSlotFilling": false,
-  "lastUpdate": 1541716209,
+  "lastUpdate": 1550793330,
   "fallbackIntent": true,
   "events": []
 }

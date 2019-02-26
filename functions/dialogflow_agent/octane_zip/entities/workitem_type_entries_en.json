@@ -1,0 +1,50 @@
+[
+  {
+    "value": "defect",
+    "synonyms": [
+      "defect",
+      "bug",
+      "issue",
+      "anomaly"
+    ]
+  },
+  {
+    "value": "user story",
+    "synonyms": [
+      "user story",
+      "story",
+      "customer story"
+    ]
+  },
+  {
+    "value": "feature",
+    "synonyms": [
+      "feature"
+    ]
+  },
+  {
+    "value": "epic",
+    "synonyms": [
+      "epic",
+      "theme"
+    ]
+  },
+  {
+    "value": "quality story",
+    "synonyms": [
+      "quality story"
+    ]
+  },
+  {
+    "value": "task",
+    "synonyms": [
+      "task"
+    ]
+  },
+  {
+    "value": "work item",
+    "synonyms": [
+      "work item"
+    ]
+  }
+]

@@ -1,0 +1,175 @@
+[
+  {
+    "id": "e41278b2-f00c-4705-96d6-17f78e183491",
+    "data": [
+      {
+        "text": "Issue a new ",
+        "userDefined": false
+      },
+      {
+        "text": "task",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "66cd8d20-6505-46e6-832a-be987e685beb",
+    "data": [
+      {
+        "text": "Create a new ",
+        "userDefined": false
+      },
+      {
+        "text": "work item",
+        "meta": "@sys.ignore",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550661135
+  },
+  {
+    "id": "4d71cd4d-25df-422b-82ed-526296ebc909",
+    "data": [
+      {
+        "text": "Open a new item",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550661135
+  },
+  {
+    "id": "4e9e4be1-72f1-4be7-8400-cf89c4c40138",
+    "data": [
+      {
+        "text": "Can you create a new ",
+        "userDefined": false
+      },
+      {
+        "text": "defect",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "795109ca-10fd-438d-aed7-a91eaf6e3677",
+    "data": [
+      {
+        "text": "Issue a new ",
+        "userDefined": false
+      },
+      {
+        "text": "user story",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "392a4961-58eb-41b7-afe3-939039187e89",
+    "data": [
+      {
+        "text": "Create a new ",
+        "userDefined": false
+      },
+      {
+        "text": "feature",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "b4cc61a9-8893-4ec1-8db3-487b23724d18",
+    "data": [
+      {
+        "text": "Generate a new ",
+        "userDefined": false
+      },
+      {
+        "text": "epic",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "d99856b9-3601-4a0f-8bb1-3b4a84639027",
+    "data": [
+      {
+        "text": "Please add a ",
+        "userDefined": false
+      },
+      {
+        "text": "quality story",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "5d04c50b-bd8c-4b86-bc65-87ddf3d6e34b",
+    "data": [
+      {
+        "text": "Open a new ",
+        "userDefined": false
+      },
+      {
+        "text": "defect",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  },
+  {
+    "id": "af4d17c4-a50a-4bb6-a24d-71850602db8a",
+    "data": [
+      {
+        "text": "Create a new ",
+        "userDefined": false
+      },
+      {
+        "text": "user story",
+        "alias": "type",
+        "meta": "@workitem_type",
+        "userDefined": true
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "updated": 1550697615
+  }
+]

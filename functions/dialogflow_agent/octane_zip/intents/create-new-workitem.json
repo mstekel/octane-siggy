@@ -1,0 +1,51 @@
+{
+  "id": "33dcdab6-54e8-4151-96ac-13b60d64350c",
+  "name": "create-new-workitem",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [],
+      "parameters": [
+        {
+          "id": "1162a6b7-cd4f-4924-915a-188e6f75d1b0",
+          "required": true,
+          "dataType": "@workitem_type",
+          "name": "type",
+          "value": "$type",
+          "prompts": [
+            {
+              "lang": "en",
+              "value": "Please specify the type of your work item"
+            },
+            {
+              "lang": "en",
+              "value": "Please provide the item type"
+            },
+            {
+              "lang": "en",
+              "value": "Please supply entity type"
+            }
+          ],
+          "isList": false
+        }
+      ],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {},
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 1551114090,
+  "fallbackIntent": false,
+  "events": []
+}
