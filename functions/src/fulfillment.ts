@@ -5,7 +5,8 @@ const {
     Table,
     OpenUrlAction,
     BasicCard,
-    Button
+    Button,
+    Suggestions
 } = require('actions-on-google');
 
 const functions = require('firebase-functions');
@@ -101,9 +102,9 @@ const authenticate = (octaneUserId) => new Promise((resolve, reject) => {
         (error, response, body) => {
             if (response.statusCode !== 200) {
                 if (response.statusCode === 424) {
-                    resolve({ username: null });
+                    resolve({username: null});
                 } else {
-                    reject(error);
+                    reject(error || {message: 'Server responded with HTTP ' + response.statusCode + '. Please check your Octane server availability'});
                 }
             } else {
                 const baseUrl = getBaseUrl();
@@ -130,7 +131,7 @@ const authenticate = (octaneUserId) => new Promise((resolve, reject) => {
 
                     console.log('Auhtentication succeeded. Username: ' + username);
 
-                    resolve({ username: username });
+                    resolve({username: username});
                 }).on('error', (err) => {
                     console.error('Authentication failed.');
                     reject(err);
@@ -155,6 +156,55 @@ const getLastRunStatusByPipelineName = pipeline => new Promise((resolve, reject)
             reject(new Error('No run of pipeline ' + pipeline.name + ' found'));
         }
     });
+});
+
+const findWorkItemRoot = (data: IntentHandlerInput) => new Promise((resolve, reject) => {
+    console.log("findWorkitemRoot started");
+    octane.workItemRoots.getAll({
+        limit: 1
+    }, (ex, items) => {
+        if (ex) {
+            reject(ex);
+        } else {
+            data.parameters.workItemRoot = {id: items[0].id, type: items[0].type};
+            resolve(data);
+        }
+    });
+});
+
+const findSlots = (data: IntentHandlerInput) => new Promise((resolve, reject) => {
+    console.log("findSlots started");
+    const query = Query.field('entity_name').equal(data.parameters.type).and().field('required').equal(true);
+    octane.metadata.getFields({
+        query: query
+    }, (ex, items) => {
+        if (ex) {
+            reject(ex);
+        } else {
+            console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
+            console.log(items);
+            data.parameters.slots = items;
+            resolve(data);
+        }
+    });
+});
+
+const findReferenceValues = (data: IntentHandlerInput) => new Promise((resolve, reject) => {
+    console.log("findReferenceValues started");
+    /*const query = Query.field('entity_name').equal(data.parameters.type).and().field('required').equal(true);
+    octane.metadata.getFields({
+        query: query
+    }, (ex, items) => {
+        if(ex) {
+            reject(ex);
+        } else {
+            console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
+            console.log(items);
+            data.parameters.slots = items;
+            resolve(data);
+        }
+    });*/
+    resolve(['New', 'In Progress', 'Closed']);
 });
 
 const intentMap = {
@@ -321,20 +371,32 @@ const intentMap = {
     'who-am-i': (data: IntentHandlerInput) => new Promise(resolve => {
         resolve({answers: ['Your username is ' + data.username]});
     }),
-    'create-new-workitem': (data: IntentHandlerInput) => new Promise(resolve => {
-        resolve({
-            answers: ['Please specify the name of the ' + data.parameters.type ],
-            context: {
-                name: 'expecting-slot',
-                lifespan: 1,
-                parameters: {
-                    action: 'create',
-                    type: data.parameters.type,
-                    entity: {},
-                    slots: ['name', 'severity', 'priority']
+    'create-new-workitem': (data: IntentHandlerInput) => new Promise((resolve, reject) => {
+        return findWorkItemRoot(data).then(findSlots).then((data1: IntentHandlerInput) => {
+            const slots = (data1.parameters.slots as Array<any>).filter(s => s.name !== 'parent');
+            const response = {
+                answers: ['Please specify the ' + slots[0].name + ' of the ' + data1.parameters.type],
+                context: {
+                    name: 'expecting-slot',
+                    lifespan: 1,
+                    parameters: {
+                        action: 'create',
+                        type: data1.parameters.type,
+                        entity: {parent: data1.parameters.workItemRoot},
+                        slots: slots
+                    }
                 }
+            };
+            if(slots[0].field_type === 'reference') {
+                findReferenceValues(slots[0])
+                    .then(value => {
+                        response.answers.push(new Suggestions(value));
+                        resolve(response);
+                    }).catch(reject);
+            } else {
+                resolve(response);
             }
-        });
+        }).catch(reject);
     })
 };
 
@@ -407,32 +469,51 @@ app.fallback(conv => {
         const intentHandler = (data: IntentHandlerInput) => {
             const handler = intentMap[conv.intent]
                 || (data1 => new Promise(resolve => {
-                    resolve({answers: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel.']});
+                    resolve({answers: ['I don\'t support your request yet. Please open an enhancement request to Moshe Stekel from Micro Focus.']});
                 }));
             return handler(data);
         };
 
         // here Siggy already asked for a parameter and she should decide if she need the next one
         if (conv.contexts.input['expecting-slot']) {
-            return Promise.resolve({ username: conv.user.storage.octaneUsername, parameters: conv.parameters }).then((data: IntentHandlerInput) => {
+            return Promise.resolve({
+                username: conv.user.storage.octaneUsername,
+                parameters: conv.parameters
+            }).then((data: IntentHandlerInput) => {
                 const parameters = conv.contexts.input['expecting-slot'].parameters;
-                parameters.entity[parameters.slots[0]] = conv.input.raw;
-                parameters.slots = (parameters.slots as Array<string>).slice(1);
-                if ((parameters.slots as Array<string>).length > 0) {
+                parameters.entity[parameters.slots[0].name] = conv.input.raw;
+                parameters.slots = (parameters.slots as Array<any>).slice(1);
+                if ((parameters.slots as Array<any>).length > 0) {
                     // here Siggy needs the next parameter
                     conv.contexts.set('expecting-slot', 1, parameters);
-                    conv.ask('Please specify the ' + parameters.slots[0] + ' of the ' + parameters.type);
+                    if (parameters.slots[0].field_type === 'reference') {
+                        return findReferenceValues(parameters.slots[0])
+                            .then(value => {
+                                conv.ask(
+                                    'Please specify the ' + parameters.slots[0].name
+                                    + ' of the ' + parameters.type + ' from this list below');
+                                conv.ask(new Suggestions(value));
+
+                            }).catch(handleError);
+                    } else {
+                        conv.ask('Please specify the ' + parameters.slots[0].name + ' of the ' + parameters.type);
+                        return null;
+                    }
                 } else {
                     // all the parameters have beed provided
                     conv.ask('Created!!!\n' + JSON.stringify(parameters.entity));
+                    return null;
                 }
             });
         } else if (conv.intent === 'welcome' || conv.intent === 'help') {
-            return intentHandler({ username: conv.user.storage.octaneUsername, parameters: conv.parameters }).then(handleAnswers).catch(handleError);
+            return intentHandler({
+                username: conv.user.storage.octaneUsername,
+                parameters: conv.parameters
+            }).then(handleAnswers).catch(handleError);
         } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleAnswers).catch(handleError);
         } else {
-            return (conv.user.storage.octaneUsername ? Promise.resolve({ username: conv.user.storage.octaneUsername }) : authenticate(conv.user.storage.octaneUserId)).then((data: IntentHandlerInput) => {
+            return (conv.user.storage.octaneUsername ? Promise.resolve({username: conv.user.storage.octaneUsername}) : authenticate(conv.user.storage.octaneUserId)).then((data: IntentHandlerInput) => {
                 conv.user.storage.octaneUsername = data.username;
                 data.parameters = conv.parameters;
                 return data.username ?

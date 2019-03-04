@@ -9,7 +9,7 @@
     ]
   },
   {
-    "value": "user story",
+    "value": "story",
     "synonyms": [
       "user story",
       "story",
@@ -30,7 +30,7 @@
     ]
   },
   {
-    "value": "quality story",
+    "value": "quality_story",
     "synonyms": [
       "quality story"
     ]
@@ -39,12 +39,6 @@
     "value": "task",
     "synonyms": [
       "task"
-    ]
-  },
-  {
-    "value": "work item",
-    "synonyms": [
-      "work item"
     ]
   }
 ]
