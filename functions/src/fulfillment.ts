@@ -17,6 +17,18 @@ const routesConfig = require('./routesConfig');
 const request = require('request');
 const setCookie = require('set-cookie-parser');
 
+const pluralMap = {
+    defect: 'defects',
+    story: 'stories',
+    quality_story: 'quality_stories'
+};
+
+const defaultParameters = {
+    story: {
+        story_type_c_udf: {type: 'list_node', id: 'list_node.feature_type.Architecture'}
+    }
+};
+
 const octane = new Octane({
     protocol: 'https',
     host: 'center.almoctane.com',
@@ -166,7 +178,7 @@ const findWorkItemRoot = (data: IntentHandlerInput) => new Promise((resolve, rej
         if (ex) {
             reject(ex);
         } else {
-            data.parameters.workItemRoot = {id: items[0].id, type: items[0].type};
+            data.parameters.workItemRoot = {id: items[0].id, type: 'work_item'};
             resolve(data);
         }
     });
@@ -189,22 +201,21 @@ const findSlots = (data: IntentHandlerInput) => new Promise((resolve, reject) =>
     });
 });
 
-const findReferenceValues = (data: IntentHandlerInput) => new Promise((resolve, reject) => {
+const findReferenceValues = fieldMetadata => new Promise((resolve, reject) => {
     console.log("findReferenceValues started");
-    /*const query = Query.field('entity_name').equal(data.parameters.type).and().field('required').equal(true);
-    octane.metadata.getFields({
-        query: query
-    }, (ex, items) => {
-        if(ex) {
-            reject(ex);
-        } else {
-            console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
-            console.log(items);
-            data.parameters.slots = items;
-            resolve(data);
-        }
-    });*/
-    resolve(['New', 'In Progress', 'Closed']);
+    const refTypePlural = fieldMetadata.field_type_data.targets[0].type + 's';
+    const query = Query.field('entity').equal(fieldMetadata.entity_name);
+    if (octane[refTypePlural]) {
+        octane[refTypePlural].getAll({
+            query: query
+        }, (ex, items) => {
+            if (ex) {
+                reject(ex);
+            } else {
+                resolve(items);
+            }
+        });
+    } else reject('Type not found: ' + refTypePlural);
 });
 
 const intentMap = {
@@ -373,7 +384,7 @@ const intentMap = {
     }),
     'create-new-workitem': (data: IntentHandlerInput) => new Promise((resolve, reject) => {
         return findWorkItemRoot(data).then(findSlots).then((data1: IntentHandlerInput) => {
-            const slots = (data1.parameters.slots as Array<any>).filter(s => s.name !== 'parent');
+            const slots = (data1.parameters.slots as Array<any>).filter(s => s.name !== 'parent' && s.name !== 'phase');
             const response = {
                 answers: ['Please specify the ' + slots[0].name + ' of the ' + data1.parameters.type],
                 context: {
@@ -382,15 +393,19 @@ const intentMap = {
                     parameters: {
                         action: 'create',
                         type: data1.parameters.type,
-                        entity: {parent: data1.parameters.workItemRoot},
+                        entity: {
+                            parent: data1.parameters.workItemRoot,
+                            phase: {type: 'phase', id: 'phase.' + data1.parameters.type + '.new'}
+                        },
                         slots: slots
                     }
                 }
             };
-            if(slots[0].field_type === 'reference') {
+            if (slots[0].field_type === 'reference') {
                 findReferenceValues(slots[0])
-                    .then(value => {
-                        response.answers.push(new Suggestions(value));
+                    .then((items: Array<any>) => {
+                        response.answers.push(new Suggestions(items.map(i => i.name)));
+                        slots[0].items = items;
                         resolve(response);
                     }).catch(reject);
             } else {
@@ -441,8 +456,8 @@ app.fallback(conv => {
     console.error = getLogMethod('error');
 
     const handleError = (err) => {
-        console.error(err);
-        conv.ask('Error occurred: ' + err.message);
+        console.error(err.message.errors || err.message);
+        conv.ask('Error occurred:' + JSON.stringify(err.message.errors || err.message));
         conv.ask('See firebase logs for more details.')
     };
 
@@ -481,18 +496,19 @@ app.fallback(conv => {
                 parameters: conv.parameters
             }).then((data: IntentHandlerInput) => {
                 const parameters = conv.contexts.input['expecting-slot'].parameters;
-                parameters.entity[parameters.slots[0].name] = conv.input.raw;
+                parameters.entity[parameters.slots[0].name] = parameters.slots[0].items ? parameters.slots[0].items.filter(i => i.name === conv.input.raw) || null : conv.input.raw;
                 parameters.slots = (parameters.slots as Array<any>).slice(1);
                 if ((parameters.slots as Array<any>).length > 0) {
                     // here Siggy needs the next parameter
                     conv.contexts.set('expecting-slot', 1, parameters);
                     if (parameters.slots[0].field_type === 'reference') {
                         return findReferenceValues(parameters.slots[0])
-                            .then(value => {
+                            .then((items: Array<any>) => {
+                                parameters.slots[0].items = items;
                                 conv.ask(
                                     'Please specify the ' + parameters.slots[0].name
                                     + ' of the ' + parameters.type + ' from this list below');
-                                conv.ask(new Suggestions(value));
+                                conv.ask(new Suggestions(items.map(i => i.name)));
 
                             }).catch(handleError);
                     } else {
@@ -501,8 +517,17 @@ app.fallback(conv => {
                     }
                 } else {
                     // all the parameters have beed provided
-                    conv.ask('Created!!!\n' + JSON.stringify(parameters.entity));
-                    return null;
+                    return new Promise((resolve, reject) => {
+                        octane[pluralMap[parameters.type] || parameters.type + 's'][parameters.action](
+                            Object.assign(parameters.entity, defaultParameters[parameters.type]),
+                            (ex, item) => {
+                                if (ex) {
+                                    reject(ex);
+                                } else {
+                                    resolve({answers: [parameters.type + ' #' + item.id + ' created.']});
+                                }
+                            });
+                    }).then(handleAnswers).catch(handleError);
                 }
             });
         } else if (conv.intent === 'welcome' || conv.intent === 'help') {
@@ -513,7 +538,7 @@ app.fallback(conv => {
         } else if (!conv.user.storage.octaneUserId) {
             return loginWithOctane().then(handleAnswers).catch(handleError);
         } else {
-            return (conv.user.storage.octaneUsername ? Promise.resolve({username: conv.user.storage.octaneUsername}) : authenticate(conv.user.storage.octaneUserId)).then((data: IntentHandlerInput) => {
+            return (conv.user.storage.octaneUsername && conv.intent !== 'login' ? Promise.resolve({username: conv.user.storage.octaneUsername}) : authenticate(conv.user.storage.octaneUserId)).then((data: IntentHandlerInput) => {
                 conv.user.storage.octaneUsername = data.username;
                 data.parameters = conv.parameters;
                 return data.username ?
