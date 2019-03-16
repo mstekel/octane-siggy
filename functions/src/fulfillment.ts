@@ -456,8 +456,9 @@ app.fallback(conv => {
     console.error = getLogMethod('error');
 
     const handleError = (err) => {
-        console.error(err.message.errors || err.message);
-        conv.ask('Error occurred:' + JSON.stringify(err.message.errors || err.message));
+        const error = err.message && (err.message.errors || err.message) || err;
+        console.error(error);
+        conv.ask('Error occurred:' + JSON.stringify(error));
         conv.ask('See firebase logs for more details.')
     };
 
@@ -496,7 +497,9 @@ app.fallback(conv => {
                 parameters: conv.parameters
             }).then((data: IntentHandlerInput) => {
                 const parameters = conv.contexts.input['expecting-slot'].parameters;
-                parameters.entity[parameters.slots[0].name] = parameters.slots[0].items ? parameters.slots[0].items.filter(i => i.name === conv.input.raw) || null : conv.input.raw;
+                let parameterValue = parameters.slots[0].items ? parameters.slots[0].items.filter(i => i.name === conv.input.raw) || null : conv.input.raw;
+                if(parameters.slots[0].name === 'name') parameterValue = '[Created by Octane Siggy]: ' + parameterValue;
+                parameters.entity[parameters.slots[0].name] = parameterValue;
                 parameters.slots = (parameters.slots as Array<any>).slice(1);
                 if ((parameters.slots as Array<any>).length > 0) {
                     // here Siggy needs the next parameter
